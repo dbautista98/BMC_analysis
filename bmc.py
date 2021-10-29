@@ -81,7 +81,7 @@ def annotate(filepath, diameter=5, minmass=50, maxsize=3, show=False, crop=((0,0
         tp.annotate(loc, frames[0])
     return frames
 
-def get_trajectories(frames, search_range=10, diameter=5, minmass=50, maxsize=3, show=False):
+def get_trajectories(frames, search_range=10, diameter=5, minmass=50, maxsize=3, show=False, clip_stubs=0):
     """
     tracks the particles movement across images
 
@@ -99,6 +99,8 @@ def get_trajectories(frames, search_range=10, diameter=5, minmass=50, maxsize=3,
         maximum allowed radius of a particle
     show : bool
         display image of particle trajectories
+    clip_stubs : int
+        number of frames a particle must be present in to be kept
 
     Returns:
     ---------
@@ -107,6 +109,7 @@ def get_trajectories(frames, search_range=10, diameter=5, minmass=50, maxsize=3,
     """
     all_imgs = tp.batch(frames, diameter=diameter, minmass=minmass, maxsize=maxsize)
     linked = tp.link(all_imgs, search_range=search_range)
+    linked = tp.filtering.filter_stubs(linked, threshold=clip_stubs)
     if show:
         tp.plot_traj(linked)
     return linked
