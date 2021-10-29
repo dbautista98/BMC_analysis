@@ -223,10 +223,10 @@ def viscosity(tbl, particle_number, um_per_px, fps):
     """
 
     tbl = tbl[tbl["particle"] == particle_number]
-    D = diffusion_coeff(tbl, um_per_px, fps, show=False)*u.um**2/u.second
+    D = diffusion_coeff(tbl, um_per_px, fps, show=False)*u.um**2/u.s
     R_gyration = tbl["size"].values
-    sigma_R_gyration = np.std(R_gyration)
-    mean_R_gyration = np.mean(R_gyration)
+    sigma_R_gyration = np.std(R_gyration)*u.um
+    mean_R_gyration = np.mean(R_gyration)*u.um
     kT = 300*u.K*c.k_B
 
     # calculate the radii under assumption of spherical blobs
@@ -234,7 +234,7 @@ def viscosity(tbl, particle_number, um_per_px, fps):
     r_over = np.sqrt(5/3 * (mean_R_gyration + sigma_R_gyration)**2)
     r_under = np.sqrt(5/3 * (mean_R_gyration - sigma_R_gyration)**2)
 
-    mean_visc =  (kT  / (6*np.pi*r)).to(u.mPa * u.s)
-    over_visc = (kT  / (6*np.pi*r_under)).to(u.mPa * u.s)
-    under_visc = (kT  / (6*np.pi*r_over)).to(u.mPa * u.s)
+    mean_visc =  (kT  / (6*np.pi*r*D)).to(u.mPa * u.s)
+    over_visc = (kT  / (6*np.pi*r_under*D)).to(u.mPa * u.s)
+    under_visc = (kT  / (6*np.pi*r_over*D)).to(u.mPa * u.s)
     return mean_visc.value, over_visc.value, under_visc.value
