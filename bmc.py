@@ -4,6 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pims
 import cv2
+import astropy.units as u
+import astropy.constants as c
 
 def color_plot(img, show_frac=.1, hsv=True, pshow=1, mask=None):
 
@@ -195,3 +197,44 @@ def particle_velocity(tbl, particle_number, um_per_px, fps):
     velocity_vector = velo * (vector/np.linalg.norm(vector))
     return np.mean(velo), np.std(velo), velocity_vector
 
+def viscosity(tbl, particle_number, um_per_px, fps):
+    """
+    returns average viscosity as well as the uncertainty bounds
+    under the assumption of spherical particles
+
+    Arguments:
+    -----------
+    tbl : pandas.core.frame.DataFrame
+        dataframe containing the trajectory information
+    particle_number : int
+        um_per_px : float
+        conversion ratio between micrometers and pixels
+    fps : float
+        framerate of the images
+    
+    Returns:
+    ---------
+    mean_viscosity : float
+        average viscosity based on the trajectory data
+    over_viscosity : float
+        upper bound on the viscosity based on the uncertainty
+    under_viscosity : float
+        lower bound on the viscosity based on the uncertainty
+    """
+
+    tbl = tbl[tbl["particle"] == particle_number]
+    D = diffusion_coeff(tbl, um_per_px, fps, show=False)*u.um**2/u.second
+    R_gyration = tbl["size"].values
+    sigma_R_gyration = np.std(R_gyration)
+    mean_R_gyration = np.mean(R_gyration)
+    kT = 300*u.K*c.k_B
+
+    # calculate the radii under assumption of spherical blobs
+    r = np.sqrt(5/3 * mean_R_gyration**2)
+    r_over = np.sqrt(5/3 * (mean_R_gyration + sigma_R_gyration)**2)
+    r_under = np.sqrt(5/3 * (mean_R_gyration - sigma_R_gyration)**2)
+
+    mean_visc =  (kT  / (6*np.pi*r)).to(u.mPa * u.s)
+    over_visc = (kT  / (6*np.pi*r_under)).to(u.mPa * u.s)
+    under_visc = (kT  / (6*np.pi*r_over)).to(u.mPa * u.s)
+    return mean_visc.value, over_visc.value, under_visc.value
