@@ -114,7 +114,7 @@ def get_trajectories(frames, search_range=10, diameter=5, minmass=50, maxsize=3,
         tp.plot_traj(linked)
     return linked
 
-def drift(df, show=False, correct=False):
+def clear_drift(df, show=False, correct=False):
     """
     checks and removes net drift of all particles
 
@@ -181,26 +181,21 @@ def particle_velocity(tbl, particle_number, um_per_px, fps):
     
     Returns:
     ---------
-    mean : float
-        average velocity of the particle
-    st_dev : float
-        the standard deviation of the particle's velocity
-    velocity_vector : numpy.ndarray
-        a vector of the particle's average velocity
-    all_velocity : numpy.ndarray
+    velocity : numpy.ndarray
         an array of all velocities for the particle
+    x_ velocity : numpy.ndarray
+        an array of all x velocities for the particle
+    y_velocity : numpy.ndarray
+        an array of all y velocities for the particle
     """
     tbl = tbl[tbl["particle"] == particle_number]
     x_disp = np.diff(tbl['x'].values)
     y_disp = np.diff(tbl['y'].values)
     r_disp = np.sqrt(x_disp**2 + y_disp**2)
     velo = r_disp * fps / um_per_px
-
-    x_vec = np.mean(x_disp)
-    y_vec = np.mean(y_disp)
-    vector = np.asarray([x_vec, y_vec])
-    velocity_vector = np.mean(velo) * (vector/np.linalg.norm(vector))
-    return np.mean(velo), np.std(velo), velocity_vector, velo
+    x_velo = x_disp * fps / um_per_px
+    y_velo = y_disp * fps / um_per_px
+    return velo, x_velo, y_velo
 
 def viscosity(tbl, particle_number, um_per_px, fps):
     """
@@ -221,25 +216,16 @@ def viscosity(tbl, particle_number, um_per_px, fps):
     ---------
     mean_viscosity : float
         average viscosity based on the trajectory data
-    over_viscosity : float
-        upper bound on the viscosity based on the uncertainty
-    under_viscosity : float
-        lower bound on the viscosity based on the uncertainty
+    sigma_visc : float
+        uncertainty in the viscosity
     """
 
     tbl = tbl[tbl["particle"] == particle_number]
     D = diffusion_coeff(tbl, um_per_px, fps, show=False)*u.um**2/u.s
-    R_gyration = tbl["size"].values
-    sigma_R_gyration = np.std(R_gyration)*u.um
-    mean_R_gyration = np.mean(R_gyration)*u.um
+    R_gyration = tbl["size"].values*u.um
     kT = 300*u.K*c.k_B
 
     # calculate the radii under assumption of spherical blobs
-    r = np.sqrt(5/3 * mean_R_gyration**2)
-    r_over = np.sqrt(5/3 * (mean_R_gyration + sigma_R_gyration)**2)
-    r_under = np.sqrt(5/3 * (mean_R_gyration - sigma_R_gyration)**2)
-
-    mean_visc =  (kT  / (6*np.pi*r*D)).to(u.mPa * u.s)
-    over_visc = (kT  / (6*np.pi*r_under*D)).to(u.mPa * u.s)
-    under_visc = (kT  / (6*np.pi*r_over*D)).to(u.mPa * u.s)
-    return mean_visc.value, over_visc.value, under_visc.value
+    r = np.sqrt(5/3 * R_gyration**2)
+    visc = (kT  / (6*np.pi*r*D)).to(u.mPa * u.s).value
+    return visc
