@@ -229,3 +229,16 @@ def viscosity(tbl, particle_number, um_per_px, fps):
     r = np.sqrt(5/3 * R_gyration**2)
     visc = (kT  / (6*np.pi*r*D)).to(u.mPa * u.s).value
     return visc
+
+def work(tbl, particle_number, um_per_px, fps, x):
+    
+    tbl = tbl[tbl["particle"] == particle_number]
+    
+    n = viscosity(tbl, particle_number, um_per_px, fps)
+    
+    R_gyration = tbl["size"].values
+    mean_R_gyration = np.mean(R_gyration)*u.um
+    r = np.sqrt(5/3 * mean_R_gyration**2)
+    
+    v = particle_velocity(tbl, particle_number, um_per_px, fps)[0]
+    return 6*np.pi*n*r*v*x #replace x w/ cell dimensions
