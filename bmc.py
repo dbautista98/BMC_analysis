@@ -180,11 +180,18 @@ def particle_velocity(tbl, particle_number, um_per_px, fps):
         average velocity of the particle
     st_dev : float
         the standard deviation of the particle's velocity
+    velocity_vector : numpy.ndarray
+        a vector of the particle's average velocity
     """
     tbl = tbl[tbl["particle"] == particle_number]
     x_disp = np.diff(tbl['x'].values)
     y_disp = np.diff(tbl['y'].values)
     r_disp = np.sqrt(x_disp**2 + y_disp**2)
     velo = r_disp * fps / um_per_px
-    return np.mean(velo), np.std(velo)
+
+    x_vec = np.mean(x_disp)
+    y_vec = np.mean(y_disp)
+    vector = np.asarray([x_vec, y_vec])
+    velocity_vector = velo * (vector/np.linalg.norm(vector))
+    return np.mean(velo), np.std(velo), velocity_vector
 
