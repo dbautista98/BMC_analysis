@@ -199,7 +199,7 @@ def particle_velocity(tbl, particle_number, um_per_px, fps):
     x_vec = np.mean(x_disp)
     y_vec = np.mean(y_disp)
     vector = np.asarray([x_vec, y_vec])
-    velocity_vector = velo * (vector/np.linalg.norm(vector))
+    velocity_vector = np.mean(velo) * (vector/np.linalg.norm(vector))
     return np.mean(velo), np.std(velo), velocity_vector, velo
 
 def viscosity(tbl, particle_number, um_per_px, fps):
