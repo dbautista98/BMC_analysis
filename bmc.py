@@ -184,6 +184,8 @@ def particle_velocity(tbl, particle_number, um_per_px, fps):
         the standard deviation of the particle's velocity
     velocity_vector : numpy.ndarray
         a vector of the particle's average velocity
+    all_velocity : numpy.ndarray
+        an array of all velocities for the particle
     """
     tbl = tbl[tbl["particle"] == particle_number]
     x_disp = np.diff(tbl['x'].values)
@@ -195,7 +197,7 @@ def particle_velocity(tbl, particle_number, um_per_px, fps):
     y_vec = np.mean(y_disp)
     vector = np.asarray([x_vec, y_vec])
     velocity_vector = velo * (vector/np.linalg.norm(vector))
-    return np.mean(velo), np.std(velo), velocity_vector
+    return np.mean(velo), np.std(velo), velocity_vector, velo
 
 def viscosity(tbl, particle_number, um_per_px, fps):
     """
