@@ -160,3 +160,31 @@ def diffusion_coeff(df, um_per_px, fps, show=False):
     D = fit["A"][0]/4
     return D
 
+def particle_velocity(tbl, particle_number, um_per_px, fps):
+    """
+    returns average velocity of a single particle in microns per second
+
+    Arguments:
+    -----------
+    tbl : pandas.core.frame.DataFrame
+        dataframe containing the trajectory information
+    particle_number : int
+        um_per_px : float
+        conversion ratio between micrometers and pixels
+    fps : float
+        framerate of the images
+    
+    Returns:
+    ---------
+    mean : float
+        average velocity of the particle
+    st_dev : float
+        the standard deviation of the particle's velocity
+    """
+    tbl = tbl[tbl["particle"] == particle_number]
+    x_disp = np.diff(tbl['x'].values)
+    y_disp = np.diff(tbl['y'].values)
+    r_disp = np.sqrt(x_disp**2 + y_disp**2)
+    velo = r_disp * fps / um_per_px
+    return np.mean(velo), np.std(velo)
+
