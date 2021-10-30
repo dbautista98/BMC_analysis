@@ -240,7 +240,8 @@ def work(tbl, particle_number, um_per_px, fps, x):
     tbl : pandas.core.frame.DataFrame
         dataframe containing the trajectory information
     particle_number : int
-        um_per_px : float
+        index of particle in dataframe
+    um_per_px : float
         conversion ratio between micrometers and pixels
     fps : float
         framerate of the images
@@ -262,9 +263,26 @@ def work(tbl, particle_number, um_per_px, fps, x):
     r = np.sqrt(5/3 * mean_R_gyration**2)
     
     v = particle_velocity(tbl, particle_number, um_per_px, fps)[0]
-    return 6*np.pi*n*r*v*x #replace x w/ cell dimensions
+    return 6*np.pi*n*r*v*x # for placeholder, set x = 20
 
 def theory_D(diameter, viscosity, temperature):
+    """
+    calculates the theoretical diffusion coefficient for a set of parameters
+
+    Arguments:
+    -----------
+    diameter : float
+        diameter of a particle in um 
+    viscosity : float
+        fluid viscosity in units of cP [mPa s]
+    temperature : float
+        temperature in Kelvin
+
+    Returns:
+    ---------
+    D : float
+        diffusion coefficient in units of um^2 s^-1
+    """
     d = diameter*u.um                 # diameter in mocrometers
     eta = viscosity*u.mPa*u.second    # viscosity in cP [mPa * s]
     T = temperature*u.Kelvin          # Temperature in Kelvin
@@ -297,13 +315,33 @@ def simulate_experiment(diameter, viscosity, temperature, tau=0.1, N=1000):
     d_squared_displacement = dx**2 + dy**2
     squared_displacement = x**2 + y**2
     
-    
     D_estimated = estimate_D(d_squared_displacement, dimensions, tau)
     stand_err, actual_err = uncertainty(d_squared_displacement, dimensions, tau, N, D_predicted, D_estimated)
     
     return squared_displacement.value, D_predicted.value, D_estimated.value, stand_err.value, actual_err.value
 
-def simulation_wrapper(bead_sizes, viscosities, room_temp=237, n_points=1000, show=False):
+def simulation_wrapper(bead_sizes, viscosities, room_temp=300, n_points=1000, show=False):
+    """
+    simulates brownian motion with beads of given sizes in fluids of given viscosities
+
+    Arguments:
+    -----------
+    bead_sizes : list
+        list of bead sized in um
+    viscosities : list
+        list of fluid viscosities in units of cP (centi Poise) [mPa s]
+    room_temp : float
+        temperature in Kelvin
+    n_points : int
+        number of steps a particle should take in the simulation
+    show : bool
+        option to display plot of the squared displacement
+
+    Returns:
+    ---------
+    analysis_results : pandas.core.frame.DataFrame
+        dataframe containing the theoretical and simulated diffusion coefficients
+    """
     #n_points = 1000
     all_sims = []
     
