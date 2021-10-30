@@ -231,6 +231,27 @@ def viscosity(tbl, particle_number, um_per_px, fps):
     return visc
 
 def work(tbl, particle_number, um_per_px, fps, x):
+    """
+    returns the amount of work needed to transport a vesicle from 
+    the perimeter of a cell to its center using Stokes Law
+
+    Arguments:
+    -----------
+    tbl : pandas.core.frame.DataFrame
+        dataframe containing the trajectory information
+    particle_number : int
+        um_per_px : float
+        conversion ratio between micrometers and pixels
+    fps : float
+        framerate of the images
+    x : float
+        distance traveled by the vesicle
+    
+    Returns:
+    ---------
+    work : float
+       average work needed
+    """
     
     tbl = tbl[tbl["particle"] == particle_number]
     
