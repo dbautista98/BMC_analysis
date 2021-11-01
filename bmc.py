@@ -263,3 +263,34 @@ def work(tbl, particle_number, um_per_px, fps, x):
     
     v = particle_velocity(tbl, particle_number, um_per_px, fps)[0]
     return 6*np.pi*n*r*v*x #for placeholder, set x = 20
+
+def work_comp(tbl, particle_number, um_per_px, fps, x):
+    """
+    returns the percent error between the minimum calculated work 
+    needed to transport a vesicle to the cell perimeter and its expected
+    value
+
+    Arguments:
+    -----------
+    tbl : pandas.core.frame.DataFrame
+        dataframe containing the trajectory information
+    particle_number : int
+        um_per_px : float
+        conversion ratio between micrometers and pixels
+    fps : float
+        framerate of the images
+    x : float
+        distance traveled by the vesicle
+    
+    Returns:
+    ---------
+    work_comp : float
+       percent difference between the calculated and expected values of work
+    """
+    
+    work_calc = work(tbl, particle_number, um_per_px, fps, x)
+    work_exp = 30.5 # units of kJ/mol, amount of energy that is released when ATP is hydrolyzed to ADP
+        # per https://courses.lumenlearning.com/boundless-biology/chapter/atp-adenosine-triphosphate/
+    
+    return abs(work_exp-work_calc) / work_exp * 100
+
