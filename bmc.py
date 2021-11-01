@@ -240,7 +240,8 @@ def work(tbl, particle_number, um_per_px, fps, x):
     tbl : pandas.core.frame.DataFrame
         dataframe containing the trajectory information
     particle_number : int
-        um_per_px : float
+        index of particle in dataframe
+    um_per_px : float
         conversion ratio between micrometers and pixels
     fps : float
         framerate of the images
@@ -262,6 +263,7 @@ def work(tbl, particle_number, um_per_px, fps, x):
     r = np.sqrt(5/3 * mean_R_gyration**2)
     
     v = particle_velocity(tbl, particle_number, um_per_px, fps)[0]
+<<<<<<< HEAD
     return 6*np.pi*n*r*v*x #for placeholder, set x = 20
 
 def work_comp(tbl, particle_number, um_per_px, fps, x):
@@ -293,4 +295,117 @@ def work_comp(tbl, particle_number, um_per_px, fps, x):
         # per https://courses.lumenlearning.com/boundless-biology/chapter/atp-adenosine-triphosphate/
     
     return abs(work_exp-work_calc) / work_exp * 100
+=======
+    return 6*np.pi*n*r*v*x # for placeholder, set x = 20
+
+def theory_D(diameter, viscosity, temperature):
+    """
+    calculates the theoretical diffusion coefficient for a set of parameters
+
+    Arguments:
+    -----------
+    diameter : float
+        diameter of a particle in um 
+    viscosity : float
+        fluid viscosity in units of cP [mPa s]
+    temperature : float
+        temperature in Kelvin
+
+    Returns:
+    ---------
+    D : float
+        diffusion coefficient in units of um^2 s^-1
+    """
+    d = diameter*u.um                 # diameter in mocrometers
+    eta = viscosity*u.mPa*u.second    # viscosity in cP [mPa * s]
+    T = temperature*u.Kelvin          # Temperature in Kelvin
+
+    D = (T*c.k_B / (3*np.pi*eta*d)).to(u.um**2/u.second)
+    return D
+
+def estimate_D(d_squared_displacement, dimensions, tau):
+    simulated_D = np.mean(d_squared_displacement/(2*dimensions*tau))
+    return simulated_D.to(u.um**2/u.second)
+
+def uncertainty(d_squared_displacement, dimensions, tau, N, D, simulated_D):
+    standard_error = np.std(d_squared_displacement) / (2*dimensions*tau*np.sqrt(N))
+    actual_error = D - simulated_D
+    return standard_error.to(u.um**2/u.second), actual_error.to(u.um**2/u.second)
+
+def simulate_experiment(diameter, viscosity, temperature, tau=0.1, N=1000):
+    D_predicted = theory_D(diameter, viscosity, temperature)
+    dimensions = 2
+    tau = tau*u.second
+    time = tau*np.arange(N)
+    k = np.sqrt(D_predicted*dimensions*tau)
+    diameter = diameter*u.um
+    viscosity = viscosity*u.mPa*u.second
+    dx = k * np.random.randn(N)
+    dy = k * np.random.randn(N)
+
+    x = np.cumsum(dx)
+    y = np.cumsum(dy)
+    d_squared_displacement = dx**2 + dy**2
+    squared_displacement = x**2 + y**2
+    
+    D_estimated = estimate_D(d_squared_displacement, dimensions, tau)
+    stand_err, actual_err = uncertainty(d_squared_displacement, dimensions, tau, N, D_predicted, D_estimated)
+    
+    return squared_displacement.value, D_predicted.value, D_estimated.value, stand_err.value, actual_err.value
+
+def simulation_wrapper(bead_sizes, viscosities, room_temp=300, n_points=1000, show=False):
+    """
+    simulates brownian motion with beads of given sizes in fluids of given viscosities
+
+    Arguments:
+    -----------
+    bead_sizes : list
+        list of bead sized in um
+    viscosities : list
+        list of fluid viscosities in units of cP (centi Poise) [mPa s]
+    room_temp : float
+        temperature in Kelvin
+    n_points : int
+        number of steps a particle should take in the simulation
+    show : bool
+        option to display plot of the squared displacement
+
+    Returns:
+    ---------
+    analysis_results : pandas.core.frame.DataFrame
+        dataframe containing the theoretical and simulated diffusion coefficients
+    """
+    #n_points = 1000
+    all_sims = []
+    
+    if show:
+        plt.figure(figsize=(10,7))
+        for diam in bead_sizes:
+            for visc in viscosities:
+                simulation_results = simulate_experiment(diam, visc, room_temp, N=n_points)
+                all_sims.append(simulation_results[1:])
+                plt.plot(simulation_results[0], label=r"d = %s $\mu m$, $\eta$ = %s cP"%(diam, visc))
+        plt.legend()
+        plt.ylabel(r"displacement squared $[\mu m^2]$");
+        plt.show()
+    else:
+        for diam in bead_sizes:
+            for visc in viscosities:
+                simulation_results = simulate_experiment(diam, visc, room_temp, N=n_points)
+                all_sims.append(simulation_results[1:])
+
+    all_sims = np.asarray(all_sims)
+    labels = []
+    analysis_results = pd.DataFrame()
+    for diam in bead_sizes:
+        for visc in viscosities:
+            labels.append("d = %s um, visc = %s cP"%(diam, visc))
+
+    analysis_results["parameters"] = labels
+
+    column_names = ["D theory [mPa s]", "D measured [mPa s]", "standard error [mPa s]", "actual error [mPa s]"]
+    for i in range(len(column_names)):
+        analysis_results[column_names[i]] = all_sims[:, i]
+    return analysis_results
+>>>>>>> f73e96725b8dc6566a2c4a2884bc3a7ddf0eb00b
 
