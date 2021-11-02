@@ -167,7 +167,8 @@ def diffusion_coeff(df, um_per_px, fps, show=False):
 
 def particle_velocity(tbl, particle_number, um_per_px, fps):
     """
-    returns average velocity of a single particle in microns per second
+    returns total velocity and x,y components of a single 
+    particle's velocity in microns per second
 
     Arguments:
     -----------
@@ -199,7 +200,7 @@ def particle_velocity(tbl, particle_number, um_per_px, fps):
 
 def viscosity(tbl, particle_number, um_per_px, fps):
     """
-    returns average viscosity as well as the uncertainty bounds
+    returns viscosity for each point in its trajectory
     under the assumption of spherical particles
 
     Arguments:
