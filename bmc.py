@@ -263,7 +263,6 @@ def work(tbl, particle_number, um_per_px, fps, x):
     r = np.sqrt(5/3 * mean_R_gyration**2)
     
     v = particle_velocity(tbl, particle_number, um_per_px, fps)[0]
-<<<<<<< HEAD
     return 6*np.pi*n*r*v*x #for placeholder, set x = 20
 
 def work_comp(tbl, particle_number, um_per_px, fps, x):
@@ -277,7 +276,8 @@ def work_comp(tbl, particle_number, um_per_px, fps, x):
     tbl : pandas.core.frame.DataFrame
         dataframe containing the trajectory information
     particle_number : int
-        um_per_px : float
+        index of particle in dataframe
+    um_per_px : float
         conversion ratio between micrometers and pixels
     fps : float
         framerate of the images
@@ -295,8 +295,6 @@ def work_comp(tbl, particle_number, um_per_px, fps, x):
         # per https://courses.lumenlearning.com/boundless-biology/chapter/atp-adenosine-triphosphate/
     
     return abs(work_exp-work_calc) / work_exp * 100
-=======
-    return 6*np.pi*n*r*v*x # for placeholder, set x = 20
 
 def theory_D(diameter, viscosity, temperature):
     """
@@ -407,5 +405,4 @@ def simulation_wrapper(bead_sizes, viscosities, room_temp=300, n_points=1000, sh
     for i in range(len(column_names)):
         analysis_results[column_names[i]] = all_sims[:, i]
     return analysis_results
->>>>>>> f73e96725b8dc6566a2c4a2884bc3a7ddf0eb00b
 
