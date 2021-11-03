@@ -233,7 +233,7 @@ def viscosity(tbl, particle_number, um_per_px, fps):
 
 def work(tbl, particle_number, um_per_px, fps, x):
     """
-    returns the amount of work needed to transport a vesicle from 
+    returns the amount of total work needed to transport a vesicle from 
     the perimeter of a cell to its center using Stokes Law
 
     Arguments:
@@ -252,7 +252,7 @@ def work(tbl, particle_number, um_per_px, fps, x):
     Returns:
     ---------
     work : float
-       average work needed
+       total amount of work
     """
     
     tbl = tbl[tbl["particle"] == particle_number]
@@ -264,13 +264,16 @@ def work(tbl, particle_number, um_per_px, fps, x):
     r = np.sqrt(5/3 * mean_R_gyration**2)
     
     v = particle_velocity(tbl, particle_number, um_per_px, fps)[0]
-    return 6*np.pi*n*r*v*x #for placeholder, set x = 20
+    
+    # WIP: determine proper distance to cell perimeter, x
+    # for placeholder, set x = 20 um 
+    
+    return 3*np.pi*n*r*v*x #units of joules
 
-def work_comp(tbl, particle_number, um_per_px, fps, x):
+def myosin_num(tbl, particle_number, um_per_px, fps, x):
     """
-    returns the percent error between the minimum calculated work 
-    needed to transport a vesicle to the cell perimeter and its expected
-    value
+    returns the the minimum number of myosin motors required
+    to transport a vesicle from the perimeter of the cell to its center.
 
     Arguments:
     -----------
@@ -287,15 +290,19 @@ def work_comp(tbl, particle_number, um_per_px, fps, x):
     
     Returns:
     ---------
-    work_comp : float
-       percent difference between the calculated and expected values of work
+    myosin_num : int
+       number of myosin motors, rounded to the nearest integer
+       (can't have one half motor, etc.)
     """
     
     work_calc = work(tbl, particle_number, um_per_px, fps, x)
-    work_exp = 30.5 # units of kJ/mol, amount of energy that is released when ATP is hydrolyzed to ADP
-        # per https://courses.lumenlearning.com/boundless-biology/chapter/atp-adenosine-triphosphate/
+    free_e = 30.5 # units of kJ/mol, amount of free energy that is released when ATP is hydrolyzed to ADP
+                  # if this doesn't work, try 57.5 kJ/mol
     
-    return abs(work_exp-work_calc) / work_exp * 100
+        # per https://courses.lumenlearning.com/boundless-biology/chapter/atp-adenosine-triphosphate/
+        # WIP: UNIT CONVERSION REQUIRED b/n REQUIRED WORK, FREE ENERGY RELEASED
+    
+    return int(work_calc / free_e) #expected value should be in the teens for a given cell
 
 def theory_D(diameter, viscosity, temperature):
     """
