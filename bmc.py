@@ -296,8 +296,8 @@ def myosin_num(tbl, particle_number, um_per_px, fps, x):
     """
     
     work_calc = work(tbl, particle_number, um_per_px, fps, x)
-    free_e = 30.5 # units of kJ/mol, amount of free energy that is released when ATP is hydrolyzed to ADP
-                  # if this doesn't work, try 57.5 kJ/mol
+    free_e = 57.5 # units of kJ/mol, amount of free energy that is released when ATP is hydrolyzed to ADP
+                  # if this doesn't work, try 30.5 kJ/mol
     
         # per https://courses.lumenlearning.com/boundless-biology/chapter/atp-adenosine-triphosphate/
         # WIP: UNIT CONVERSION REQUIRED b/n REQUIRED WORK, FREE ENERGY RELEASED
