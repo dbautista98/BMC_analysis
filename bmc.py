@@ -302,7 +302,7 @@ def myosin_num(tbl, particle_number, um_per_px, fps, x):
         # per https://courses.lumenlearning.com/boundless-biology/chapter/atp-adenosine-triphosphate/
         # WIP: UNIT CONVERSION REQUIRED b/n REQUIRED WORK, FREE ENERGY RELEASED
     
-    return int(work_calc / free_e) #expected value should be in the teens for a given cell
+    return np.round(work_calc / free_e) #expected value should be in the teens for a given cell
 
 def theory_D(diameter, viscosity, temperature):
     """
