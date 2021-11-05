@@ -175,7 +175,8 @@ def particle_velocity(tbl, particle_number, um_per_px, fps):
     tbl : pandas.core.frame.DataFrame
         dataframe containing the trajectory information
     particle_number : int
-        um_per_px : float
+        index of particle in dataframe
+    um_per_px : float
         conversion ratio between micrometers and pixels
     fps : float
         framerate of the images
@@ -208,7 +209,8 @@ def viscosity(tbl, particle_number, um_per_px, fps):
     tbl : pandas.core.frame.DataFrame
         dataframe containing the trajectory information
     particle_number : int
-        um_per_px : float
+        index of particle in dataframe
+    um_per_px : float
         conversion ratio between micrometers and pixels
     fps : float
         framerate of the images
