@@ -6,6 +6,7 @@ import pims
 import cv2
 import astropy.units as u
 import astropy.constants as c
+from scipy.optimize import curve_fit
 
 def color_plot(img, show_frac=.1, hsv=True, pshow=1, mask=None):
 
@@ -416,3 +417,39 @@ def simulation_wrapper(bead_sizes, viscosities, room_temp=300, n_points=1000, sh
         analysis_results[column_names[i]] = all_sims[:, i]
     return analysis_results
 
+def gaussian(x, amp, mu, sigma):
+    return amp*np.exp(-0.5 * (x - mu)**2/sigma**2) 
+
+def MSD(df, magnification):
+    """
+    calculate the mean squared displacement 
+    from a trajectory table
+    """
+    msds = np.array([])
+    unique = np.unique(df["particle"])
+    for i in unique:
+        temp = df[df["particle"]==i]
+        dx = np.diff(temp['x'])*magnification
+        dy = np.diff(temp['y'])*magnification
+        dr2 = (dx**2 + dy**2)
+        msds = np.append(msds, np.mean(dr2))
+    return msds
+
+def gaussian_model(df, magnification, fps, bins, p0=(1,1,1)):
+    """
+    plots histogram and fits a gaussian to it
+    """
+    plt.figure()
+    dr2s = MSD(df, magnification)
+    bin_height, bin_edges, _ = plt.hist(dr2s, bins=bins)
+    plt.xlabel(r"$\Delta r^2$ [um$^2$]")
+
+    step = np.diff(bin_edges)[0]
+    x_pts = np.arange(bin_edges[0] + 0.5*step, bin_edges[-1]+0.5*step, step)
+    popt, pcov = curve_fit(gaussian, x_pts, bin_height, p0=(1, 1, 1))
+
+    D = popt[1]/2*fps
+
+    xx = np.linspace(bin_edges[0], bin_edges[-1], 1000)
+    plt.plot(xx, gaussian(xx, *popt), label="mean = %s um$^2$,\n$\sigma$ = %s um$^2$\nD = %s um$^2$"%(np.round(popt[1], 5), np.round(np.abs(popt[2]), 5), np.round(D, 4)), linestyle="--", color="crimson")
+    plt.legend()
