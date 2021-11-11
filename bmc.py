@@ -446,7 +446,7 @@ def gaussian_model(df, magnification, fps, bins, p0=(1,1,1)):
 
     step = np.diff(bin_edges)[0]
     x_pts = np.arange(bin_edges[0] + 0.5*step, bin_edges[-1]+0.5*step, step)
-    popt, pcov = curve_fit(gaussian, x_pts, bin_height, p0=(1, 1, 1))
+    popt, pcov = curve_fit(gaussian, x_pts, bin_height, p0=p0)
 
     D = popt[1]/2*fps
 
