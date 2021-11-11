@@ -449,7 +449,8 @@ def gaussian_model(df, magnification, fps, bins, p0=(1,1,1)):
     popt, pcov = curve_fit(gaussian, x_pts, bin_height, p0=p0)
 
     D = popt[1]/2*fps
+    sigma_D = np.abs(np.round(popt[2]/2*fps, 3))
 
     xx = np.linspace(bin_edges[0], bin_edges[-1], 1000)
-    plt.plot(xx, gaussian(xx, *popt), label="mean = %s um$^2$\n$\sigma$ = %s um$^2$\nD = %s um$^2/s$"%(np.round(popt[1], 5), np.round(np.abs(popt[2]), 5), np.round(D, 4)), linestyle="--", color="crimson")
+    plt.plot(xx, gaussian(xx, *popt), label="mean = %s um$^2$\n$\sigma$ = %s um$^2$\nD = %s +/- %s um$^2/s$"%(np.round(popt[1], 5), np.round(np.abs(popt[2]), 5), np.round(D, 4), sigma_D), linestyle="--", color="crimson")
     plt.legend()
