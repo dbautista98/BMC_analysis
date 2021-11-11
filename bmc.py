@@ -442,7 +442,7 @@ def gaussian_model(df, magnification, fps, bins, p0=(1,1,1)):
     plt.figure()
     dr2s = MSD(df, magnification)
     bin_height, bin_edges, _ = plt.hist(dr2s, bins=bins)
-    plt.xlabel(r"$\Delta r^2$ [um$^2$]")
+    plt.xlabel(r"$\Delta$ r^2 [um$^2$]")
 
     step = np.diff(bin_edges)[0]
     x_pts = np.arange(bin_edges[0] + 0.5*step, bin_edges[-1]+0.5*step, step)
